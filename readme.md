@@ -1,6 +1,6 @@
 # Mars Clock
 
-A Rust-based utility for calculating and displaying Martian time.  
+A Rust-based utility for calculating and displaying Martian time.
 Demo Image:
 ![Mars Clock](.github/assets/demo.png)
 ## Description

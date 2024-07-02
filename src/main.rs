@@ -1,4 +1,6 @@
 use chrono::{DateTime, Utc};
+use self_update::backends::s3::Update;
+use self_update::cargo_crate_version;
 use std::thread;
 use std::time::Duration;
 use std::{
@@ -6,6 +8,18 @@ use std::{
     io::{self, Write},
 };
 
+fn update() -> Result<(), Box<dyn ::std::error::Error>> {
+    let status = self_update::backends::github::Update::configure()
+        .repo_owner("integrityofstellar")
+        .repo_name("mars-clock")
+        .bin_name("mars-clock")
+        .show_download_progress(true)
+        .current_version(cargo_crate_version!())
+        .build()?
+        .update()?;
+    println!("Update status: `{}`!", status.version());
+    Ok(())
+}
 // const MARS_YEAR_LENGTH: f64 = 668.5991; // Martian year in Earth days
 const MARS_SOL_LENGTH: f64 = 88775.244; // Martian sol in seconds
 const MARS_EPOCH: f64 = 2451549.5; // J2000 epoch (January 1, 2000, 12:00 UTC) in Julian days
@@ -73,6 +87,7 @@ fn display_real_time() {
 }
 
 fn main() {
+    update();
     let args: Vec<String> = env::args().collect();
     if args.len() > 1 && args[1] == "realtime" {
         println!("Displaying real-time Mars clock. Press Ctrl+C to exit.");
@@ -80,7 +95,7 @@ fn main() {
     } else {
         let earth_time = Utc::now();
         let mars_time = earth_time_to_mars_time(earth_time);
-        println!("Current Earth time\n{}\n", earth_time);
+        println!("Current Earthian time\n{}\n", earth_time);
         println!("Current Mars time\n{}", format_mars_time(&mars_time));
     }
 }
