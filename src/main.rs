@@ -1,51 +1,61 @@
 use chrono::{DateTime, Utc};
 
-const SECONDS_PER_SOL: f64 = 88775.244; // Length of a Martian sol in seconds
-const SECONDS_PER_DAY: f64 = 86400.0; // Length of an Earth day in seconds
-const MARS_SOL_OFFSET: f64 = 24000.0; // Approximate offset of Mars epoch from Unix epoch in seconds
+const MARS_YEAR_LENGTH: f64 = 668.5991; // Martian year in Earth days
+const MARS_SOL_LENGTH: f64 = 88775.244; // Martian sol in seconds
+const MARS_EPOCH: f64 = 2451549.5; // J2000 epoch (January 1, 2000, 12:00 UTC) in Julian days
+const EARTH_SECONDS_PER_DAY: f64 = 86400.0;
+
+pub struct MarsTime {
+    amt: f64,
+    ls: f64,
+}
+
+pub fn earth_time_to_mars_time(earth_time: DateTime<Utc>) -> MarsTime {
+    let julian_date = earth_time_to_julian_date(earth_time);
+    let mars_sol = (julian_date - MARS_EPOCH) / (MARS_SOL_LENGTH / EARTH_SECONDS_PER_DAY);
+
+    let amt = (mars_sol.fract() * 24.0) % 24.0;
+    let ls = calculate_solar_longitude(julian_date);
+
+    MarsTime { amt, ls }
+}
+
+fn earth_time_to_julian_date(earth_time: DateTime<Utc>) -> f64 {
+    2440587.5 + (earth_time.timestamp() as f64) / EARTH_SECONDS_PER_DAY
+}
+
+fn calculate_solar_longitude(jd: f64) -> f64 {
+    // Constants for Mars orbit
+    let m_alpha: f64 = 19.3870;
+    let m_phi: f64 = 0.089920;
+    let m_epsilon: f64 = 0.42184;
+    let m_tau: f64 = 1.90258;
+    let m_lm: f64 = 0.01680;
+
+    let t = (jd - 2451545.0) / 36525.0;
+    let m = (19.3870 + 0.52402075 * t).to_radians();
+
+    let alpha = (m_alpha + m_phi * (jd - MARS_EPOCH)).to_radians();
+    let pbs = m_epsilon * (alpha + m_tau - m).sin();
+
+    let ls = (alpha + 2.0 * m_epsilon * (alpha - m).sin() - pbs + std::f64::consts::PI)
+        % (2.0 * std::f64::consts::PI);
+    ls.to_degrees()
+}
+
+pub fn format_mars_time(mars_time: &MarsTime) -> String {
+    format!(
+        "AMT (LMST at 0°): {:02}:{:02}:{:02}\nLs{:.2}°",
+        mars_time.amt as u32,
+        ((mars_time.amt.fract() * 60.0) as u32) % 60,
+        ((mars_time.amt.fract() * 3600.0) as u32) % 60,
+        mars_time.ls
+    )
+}
 
 fn main() {
-    let earth_time: DateTime<Utc> = Utc::now();
+    let earth_time = Utc::now();
+    let mars_time = earth_time_to_mars_time(earth_time);
     println!("Current Earth time: {}", earth_time);
-
-    let mtc = calculate_mtc(earth_time);
-    println!("Mars Time Coordinated (MTC): {}", mtc);
-
-    let amt = calculate_amt(mtc.clone());
-    println!("Areocentric Mean Time (AMT, LMST at 0°): {}", amt);
-
-    let longitude = 285.9306; // Example longitude
-    let lst = calculate_lst(mtc.clone(), longitude);
-    println!("Local Solar Time (LST) at {:.4}°: {}", longitude, lst);
-}
-
-fn calculate_mtc(earth_time: DateTime<Utc>) -> String {
-    let duration_since_unix_epoch = earth_time.timestamp() as f64;
-    let duration_since_mars_epoch = duration_since_unix_epoch + MARS_SOL_OFFSET;
-    let total_mars_seconds = duration_since_mars_epoch / SECONDS_PER_SOL;
-    let sols = total_mars_seconds.floor() as u64;
-    let remaining_seconds = (total_mars_seconds - sols as f64) * SECONDS_PER_SOL;
-
-    let hours = (remaining_seconds / 3600.0).floor() as u32;
-    let minutes = ((remaining_seconds % 3600.0) / 60.0).floor() as u32;
-    let seconds = (remaining_seconds % 60.0).floor() as u32;
-
-    format!("{:02}:{:02}:{:02}", hours, minutes, seconds)
-}
-
-fn calculate_amt(mtc: String) -> String {
-    // AMT is the same as MTC since it is LMST at 0° longitude
-    mtc
-}
-
-fn calculate_lst(mtc: String, longitude: f64) -> String {
-    let mtc_parts: Vec<u32> = mtc.split(':').map(|s| s.parse().unwrap()).collect();
-    let mtc_seconds = (mtc_parts[0] * 3600 + mtc_parts[1] * 60 + mtc_parts[2]) as f64;
-    let longitude_hours = longitude / 360.0 * 24.0;
-    let lst_seconds = (mtc_seconds + longitude_hours * 3600.0) % SECONDS_PER_SOL;
-    let lst_hours = (lst_seconds / 3600.0).floor() as u32;
-    let lst_minutes = ((lst_seconds % 3600.0) / 60.0).floor() as u32;
-    let lst_seconds = (lst_seconds % 60.0).floor() as u32;
-
-    format!("{:02}:{:02}:{:02}", lst_hours, lst_minutes, lst_seconds)
+    println!("Current Mars time:\n{}", format_mars_time(&mars_time));
 }
