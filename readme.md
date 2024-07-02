@@ -17,7 +17,7 @@ As we do not have different timezones on Mars yet, the Mars Clock uses a single 
 - Real-time updating Mars clock
 
 ## Installation
-Download the latest release file from the [releases page]() and put it somewhere on your computer where you can easily access it.
+Download the latest release file from the [releases page](https://github.com/integrityofstellar/mars-clock/releases) and put it somewhere on your computer where you can easily access it.
 Then, you can run the Mars Clock from the command line using this file, or you can add it to your PATH, `.bashrc` or `.zshrc` to run it from anywhere.
 
 Current build is done on Intel based MacOS, and works perfectly on it. If you have a different system, you can build the project manually, as I haven't tested it yet.
