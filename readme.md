@@ -9,6 +9,11 @@ This project provides a tool to convert Earth time to Mars time, including the c
 
 As we do not have different timezones on Mars yet, the Mars Clock uses a single timezone for the entire planet. The time is displayed in Airy Mean Time (AMT), which is the Mars equivalent of Greenwich Mean Time on Earth, and is based on the Mars Sol (sol = Martian day) length of 88775.244 seconds.
 
+### Accuracy
+While developer is not an expert - provided utility provides output same as following resources:
+- https://www.marsti.me/
+- https://www.giss.nasa.gov/tools/mars24/
+
 ## Features
 
 - Convert Earth time to Mars time
