@@ -95,7 +95,7 @@ fn main() {
     } else {
         let earth_time = Utc::now();
         let mars_time = earth_time_to_mars_time(earth_time);
-        println!("Current Earthian time\n{}\n", earth_time);
+        println!("Current Earth time\n{}\n", earth_time);
         println!("Current Mars time\n{}", format_mars_time(&mars_time));
     }
 }
