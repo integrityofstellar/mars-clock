@@ -1,7 +1,8 @@
 # Mars Clock
 
 A Rust-based utility for calculating and displaying Martian time.
-
+Demo Image:
+![Mars Clock](.github/assets/demo.png)
 ## Description
 
 This project provides a tool to convert Earth time to Mars time, including the calculation of Airy Mean Time (AMT) and Solar Longitude (Ls). It features both a one-time display and a real-time updating clock for Mars time.
